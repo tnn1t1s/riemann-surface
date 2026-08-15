@@ -92,10 +92,64 @@ var subs = (function() {
     }
   };
 
+  // URL for a one-shot index query: no subscribe=true, so the server
+  // sends the current matching index contents and closes.
+  Subscription.prototype.snapshotUrl = function() {
+    var ws_uri = (window.location.protocol === "https:") ? "wss://" : "ws://";
+    return ws_uri + server + "/index?query=" + encodeURIComponent(this.query);
+  };
+
+  // Process one event message from the server (streaming or snapshot).
+  Subscription.prototype.handleMessage = function(e) {
+    var t1 = Date.now();
+    if (active) {
+      var event = JSON.parse(e.data);
+      event.time = Date.parse(event.time);
+      clock.advance(event.time);
+
+      // Update the local expiry index. Only live events carry a TTL.
+      if (event.state !== "expired") {
+        this.expiries.set(util.eventKey(event), {
+          host: event.host,
+          service: event.service,
+          expiry: event.time + ((event.ttl || 60) * 1000)
+        });
+        this.f(event);
+      }
+    }
+    var t2 = Date.now();
+    load1(t1, t2);
+    load5(t1, t2);
+  };
+
+  // Populate current index state with a one-shot query, so views fill
+  // immediately instead of waiting for the next event. Best-effort: the
+  // streaming socket surfaces connectivity errors, so failures here are
+  // silent.
+  Subscription.prototype.snapshot = function() {
+    if (server_type !== "ws") {
+      return;
+    }
+
+    var self = this;
+    var ws;
+    try {
+      ws = new WebSocket(this.snapshotUrl());
+    } catch (e) {
+      return;
+    }
+    ws.onmessage = function(e) { self.handleMessage(e); };
+    ws.onerror = function() { ws.close(); };
+  };
+
   Subscription.prototype.open = function() {
     if (this.isOpen()) return this;
 
     console.log("will open url: " + this.url());
+
+    // Fetch current index state, then stream. Also runs on reconnect,
+    // repopulating whatever changed during an outage.
+    this.snapshot();
 
     var self = this;
     var ws;
@@ -121,25 +175,7 @@ var subs = (function() {
     };
 
     ws.onmessage = function(e) {
-      var t1 = Date.now();
-      if (active) {
-        var event = JSON.parse(e.data);
-        event.time = Date.parse(event.time);
-        clock.advance(event.time);
-
-        // Update the local expiry index. Only live events carry a TTL.
-        if (event.state !== "expired") {
-          self.expiries.set(util.eventKey(event), {
-            host: event.host,
-            service: event.service,
-            expiry: event.time + ((event.ttl || 60) * 1000)
-          });
-          self.f(event);
-        }
-      }
-      var t2 = Date.now();
-      load1(t1, t2);
-      load5(t1, t2);
+      self.handleMessage(e);
     };
 
     return this;
