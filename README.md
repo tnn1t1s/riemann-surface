@@ -1,16 +1,16 @@
-# riemann-dash-go
+# riemann-surface
 
-A Go port of [riemann-dash](https://github.com/riemann/riemann-dash), the
-websockets-powered dashboard for [Riemann](https://riemann.io). One static
-binary serves the UI and persists workspace configuration; the browser
-subscribes directly to Riemann's websocket (or SSE) endpoint for event data,
-exactly as in the original.
+A dashboard for [Riemann](https://riemann.io), in Go. A port of
+[riemann-dash](https://github.com/riemann/riemann-dash): one static binary
+serves the UI and persists workspace configuration; the browser subscribes
+directly to Riemann's websocket (or SSE) endpoint for event data, exactly as
+in the original.
 
 ## Get started
 
 ```bash
 go build
-./riemann-dash-go
+./riemann-surface
 ```
 
 Open http://localhost:4567 in a browser. The dashboard connects to

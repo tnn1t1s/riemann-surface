@@ -1,4 +1,4 @@
-// riemann-dash-go serves the Riemann dashboard UI and persists its
+// riemann-surface serves the Riemann dashboard UI and persists its
 // workspace configuration. Event data never passes through this server:
 // the browser subscribes directly to Riemann's websocket or SSE endpoint.
 package main
@@ -71,7 +71,7 @@ func main() {
 		fileServer.ServeHTTP(w, r)
 	})
 
-	log.Printf("riemann-dash-go listening on %s (config: %s)", *listen, *configPath)
+	log.Printf("riemann-surface listening on %s (config: %s)", *listen, *configPath)
 	log.Fatal(http.ListenAndServe(*listen, mux))
 }
 
