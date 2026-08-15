@@ -1,10 +1,9 @@
 # riemann-surface
 
-A dashboard for [Riemann](https://riemann.io), in Go. A port of
-[riemann-dash](https://github.com/riemann/riemann-dash): one static binary
-serves the UI and persists workspace configuration; the browser subscribes
-directly to Riemann's websocket (or SSE) endpoint for event data, exactly as
-in the original.
+A dashboard for [Riemann](https://riemann.io), in Go; a port of
+[riemann-dash](https://github.com/riemann/riemann-dash). The server serves
+the UI and persists workspace configuration; the browser subscribes directly
+to Riemann's websocket (or SSE) endpoint for event data.
 
 ## Get started
 
@@ -14,8 +13,8 @@ go build
 ```
 
 Open http://localhost:4567 in a browser. The dashboard connects to
-`127.0.0.1:5556` by default and shows a small manual. Change the address in
-the top-right field to point at your Riemann server's websocket port.
+`127.0.0.1:5556` by default and shows a small manual. Point the address
+field in the toolbar at your Riemann server's websocket port.
 
 ## Configuring
 
@@ -25,36 +24,28 @@ the top-right field to point at your Riemann server's websocket port.
 ```
 
 The `RIEMANN_DASH_CONFIG` environment variable sets the default config path
-when `-config` is not given. Workspace configs saved by the original
-riemann-dash load unchanged: the JSON schema, the workspace merge semantics
-(merge by name, higher `view.version` wins), and the view type names are the
-same.
+when `-config` is not given. Workspace configs written by riemann-dash load
+unchanged.
 
-## What is here
+## Views
 
-- The full view system: HStack/VStack splits, weights, keyboard-driven
-  layout editing, workspaces with rename, reorder, and URL fragments.
-- View types: `Grid`, `Gauge`, `Flot`, `Log`, `List`, `Title`, `Help`,
-  `Dial`, `Geiger`, `TimeSeries`, `iframe`, and the `Balloon`/`Fullscreen`
-  containers.
-- Local TTL expiry, the converging stream clock, the load meter, the event
-  inspector pane, and save/reload against the server.
-- Config persistence with the same merge-on-write reconciliation as the
-  Ruby implementation.
+Grid, Gauge, Flot (time-series charts), Log, List, Dial, Geiger, Title,
+iframe, and Help, composed into workspaces with HStack/VStack splits.
+Each view subscribes to a Riemann query; on open it fetches current index
+state in one shot, then streams updates, so a fresh dashboard populates
+immediately. Events expire locally by TTL. Concurrent saves from multiple
+browsers reconcile by workspace name, with the higher view version winning.
 
-## What is intentionally not here
+## Example
 
-- No Ruby, no gems, no npm, no vendored JavaScript libraries. The frontend
-  is hand-written vanilla JS and CSS, embedded in the binary. Charts that
-  the original drew with flot, smoothie, and gauge.js are drawn on plain
-  canvas.
-- The S3 config backend. Config is a file on disk.
-- Sound files. The Geiger view synthesizes its click with WebAudio; the
-  `sound` config field is preserved but not played.
-- The `TimeSeries` view renders through the same chart engine as `Flot`
-  (the original deprecated it in favor of Flot). Its `speed` option maps to
-  a time range; `delay` and `opacity` are preserved in the config but not
-  rendered.
+`examples/signals` emits five test waveforms (sine, square, sawtooth,
+normal noise, uniform noise) over Riemann's TCP protocol and includes a
+workspace config that charts each one plus an all-signals overlay:
+
+```bash
+go run ./examples/signals -riemann 127.0.0.1:5555
+./riemann-surface -config examples/signals/config.json
+```
 
 ## Keyboard reference
 
@@ -74,5 +65,5 @@ pick up changes.
 
 ## License
 
-MIT, like the original. This is a derived work of riemann-dash,
-copyright (c) 2011 Kyle Kingsbury. See LICENSE.
+MIT. A derived work of riemann-dash, copyright (c) 2011 Kyle Kingsbury.
+See LICENSE.
