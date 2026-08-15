@@ -1,0 +1,31 @@
+(function() {
+    var Help = function(json) {
+      view.View.call(this, json);
+      this.clickFocusable = true;
+      this.el.classList.add("help");
+      this.el.appendChild(util.html('<div class="box">' +
+        "<p>Welcome to Riemann-Dash.</p>" +
+        "<p>Need a refresher on the query language? See the <a href=\"https://github.com/riemann/riemann/blob/master/test/riemann/query_test.clj\">query tests</a> for examples, or read the <a href=\"https://github.com/riemann/riemann/blob/master/resources/query.g4\">spec</a>.</p>" +
+        "<p>Double-click a workspace to rename it.</p>" +
+        "<p>Press <b>Control/Meta+click</b> to select a view (<b>Option+Command+click</b> on a Mac). Escape unfocuses. Use the arrow keys to move a view. Use Control+arrow to <i>split</i> a view in the given direction.</p>" +
+        "<p>To edit a view, hit e. Use enter, or click 'apply', to apply your changes. Escape cancels.</p>" +
+        "<p>To save your changes to the server, press s. To display the configuration, press w.</p>" +
+        "<p>You can refresh the page, or press r to reload.</p>" +
+        "<p>Make views bigger and smaller with the +/- keys. Pageup selects the parent of the current view. To delete a view, use the delete key or press d.</p>" +
+        "<p>Switch between workspaces with alt-1, alt-2, etc.</p>" +
+        "<p>View is an empty space. Title is an editable text title. Fullscreen and Balloon are top-level container views; you probably won't use them. HStack and VStack are the horizontal and vertical container views; they're implicitly created by splits, but you can create them yourself for fine control. Gauge shows a single event. Grid shows a table of events. Flot shows metrics over time.</p>" +
+        '</div>'
+      ));
+    };
+
+    view.inherit(view.View, Help);
+    view.Help = Help;
+    view.types.Help = Help;
+
+    Help.prototype.json = function() {
+      return {
+        type: 'Help',
+        title: this.title
+      };
+    };
+})();
