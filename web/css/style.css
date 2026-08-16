@@ -447,6 +447,19 @@ h2 {
   bottom: 0;
 }
 
+.plane.view h2, .surface.view h2 {
+  height: 28px;
+  font-size: 24px;
+}
+
+.plane.view .container, .surface.view .container {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 .chart-tooltip {
   position: absolute;
   z-index: 50;

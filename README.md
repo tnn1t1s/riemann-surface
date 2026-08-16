@@ -29,14 +29,15 @@ unchanged.
 
 ## Views
 
-Grid, Gauge, Flot (time-series charts), Log, List, Dial, Geiger, Title,
-iframe, and Help, composed into workspaces with HStack/VStack splits.
+Grid, Gauge, Flot (time-series charts), Plane (x-y phase plots), Log, List,
+Dial, Geiger, Title, iframe, and Help, composed into workspaces with
+HStack/VStack splits.
 Each view subscribes to a Riemann query; on open it fetches current index
 state in one shot, then streams updates, so a fresh dashboard populates
 immediately. Events expire locally by TTL. Concurrent saves from multiple
 browsers reconcile by workspace name, with the higher view version winning.
 
-## Example
+## Examples
 
 `examples/signals` emits five test waveforms (sine, square, sawtooth,
 normal noise, uniform noise) over Riemann's TCP protocol and includes a
@@ -46,6 +47,12 @@ workspace config that charts each one plus an all-signals overlay:
 go run ./examples/signals -riemann 127.0.0.1:5555
 ./riemann-surface -config examples/signals/config.json
 ```
+
+`examples/riemann` streams the Riemann surface of √z: a source emits a
+circular path in the z-plane, a shipped Riemann config performs analytic
+continuation in the stream, and the dashboard watches monodromy happen —
+same z, different √z, because history matters. See
+[examples/riemann/README.md](examples/riemann/README.md).
 
 ## Keyboard reference
 
