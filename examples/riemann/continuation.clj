@@ -68,8 +68,8 @@
                             (fmt-c w)
                             sheet)
                     (cond
-                      (and at-start (= sheet 1)) "   ← same z, other sheet"
-                      (and at-start (zero? sheet)) "   ← same z, back to sheet 0"
+                      (and at-start (= sheet 1)) "   ← full circuit; other sheet"
+                      (and at-start (zero? sheet)) "   ← full circuit; back to sheet 0"
                       :else ""))})
        (merge e {:service "z re" :metric z-re})
        (merge e {:service "z im" :metric z-im})

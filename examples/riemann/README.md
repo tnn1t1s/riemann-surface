@@ -5,7 +5,13 @@ The Riemann surface of √z, watched emerging from an event stream.
 A source emits a path around the origin of the complex plane and
 nothing more:
 
-    z(θ) = e^{iθ},  θ = 0, Δθ, 2Δθ, …
+    z(θ) = r(θ)·e^{iθ},  θ = 0, Δθ, 2Δθ, …
+
+The radius oscillates between rmin and rmax with a period
+incommensurate with the sheet period 4π (the golden ratio keeps them
+from locking), so over time the path fills the whole surface rather
+than retracing one ring. rmin stays above zero because the branch
+point is where the sheets meet; continuation through it is ambiguous.
 
 At every instant there are algebraically two square roots, +√z and
 −√z. The Riemann *server* maintains the continuous choice between them
@@ -19,9 +25,9 @@ machine (continuation.clj). The stream fans each path event out to the
 continued root, its components as chartable metrics, and the sheet the
 path is on.
 
-The payoff is monodromy. Start at z = 1, w = 1. After one circuit the
-path returns to z = 1, but continuity forces w = −1; after a second
-circuit, w = +1 again:
+The payoff is monodromy. On a fixed-radius run (`-rmin 1 -rmax 1`):
+start at z = 1, w = 1. After one circuit the path returns to z = 1,
+but continuity forces w = −1; after a second circuit, w = +1 again:
 
     θ         z              continued √z
     0.00π     +1 + 0i        +1 + 0i
@@ -57,8 +63,8 @@ loops around the origin while the continued root orbits at half the
 angular rate, changing color when the path crosses onto the other
 sheet.
 
-Both workspaces end with the stream trace; once per circuit it reads
-`← same z, other sheet`.
+All workspaces end with the stream trace; once per circuit it reads
+`← full circuit; other sheet`.
 
 ## Run it
 
@@ -86,6 +92,7 @@ Flags:
 -riemann string    riemann TCP address (default "127.0.0.1:5555")
 -interval duration time between emissions (default 100ms)
 -step float        angular step per event, radians (default π/50)
--radius float      path radius (default 1)
+-rmin float        minimum path radius (default 0.15)
+-rmax float        maximum path radius (default 1)
 -host string       host field on emitted events (default "circle")
 ```
