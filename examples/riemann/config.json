@@ -1,0 +1,54 @@
+{
+  "server": "127.0.0.1:5556",
+  "server_type": "ws",
+  "workspaces": [
+    {
+      "name": "√z / time",
+      "view": {
+        "type": "Balloon",
+        "child": {
+          "type": "VStack",
+          "children": [
+            {"type": "Flot", "title": "z(t) — period T", "query": "service =~ \"z %\"", "timeRange": 60, "min": -1.2, "max": 1.2, "weight": 3},
+            {"type": "Flot", "title": "√z(t), continued — period 2T", "query": "service =~ \"sqrt-z %\"", "timeRange": 60, "min": -1.2, "max": 1.2, "weight": 3},
+            {"type": "Flot", "title": "sheet", "query": "service = \"sheet\"", "timeRange": 60, "min": -0.2, "max": 1.2, "weight": 2},
+            {"type": "Log", "title": "stream", "query": "service = \"sqrt-z\"", "weight": 2}
+          ]
+        }
+      }
+    },
+    {
+      "name": "√z / surface",
+      "view": {
+        "type": "Balloon",
+        "child": {
+          "type": "VStack",
+          "children": [
+            {"type": "Surface", "title": "Re √z over the z-plane", "query": "service = \"sqrt-z\"", "trail": 2400, "weight": 4},
+            {"type": "Log", "title": "stream", "query": "service = \"sqrt-z\"", "weight": 1}
+          ]
+        }
+      }
+    },
+    {
+      "name": "√z / plane",
+      "view": {
+        "type": "Balloon",
+        "child": {
+          "type": "VStack",
+          "children": [
+            {
+              "type": "HStack",
+              "weight": 3,
+              "children": [
+                {"type": "Plane", "title": "z = e^iθ", "query": "service = \"z\"", "xField": "z-real", "yField": "z-imag"},
+                {"type": "Plane", "title": "√z, continued", "query": "service = \"sqrt-z\"", "xField": "w-real", "yField": "w-imag"}
+              ]
+            },
+            {"type": "Log", "title": "stream", "query": "service = \"sqrt-z\"", "weight": 1}
+          ]
+        }
+      }
+    }
+  ]
+}
