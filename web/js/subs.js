@@ -5,6 +5,41 @@
 // state="expired" event is emitted.
 var subs = (function() {
 
+  // Saved workspaces are written in Riemann's query grammar. riemann-go took
+  // that grammar out and uses expr-lang for both rule predicates and the `q`
+  // parameter, so a stored query is translated on its way to the server
+  // rather than rewritten in every config people already have.
+  //
+  //   service = "x" and tagged "y"  ->  service == "x" && tagged("y")
+  //   service =~ "ntfy.listen%"     ->  service matches "^ntfy\\.listen.*$"
+  //
+  // The regex ends up inside an expr string literal, which eats one level of
+  // backslash, so each one is doubled. A translator that emits single
+  // backslashes gets a 400 and an empty pane.
+  function likeToRegex(field, pattern) {
+    var out = "";
+    for (var i = 0; i < pattern.length; i++) {
+      var ch = pattern[i];
+      if (ch === "%") out += ".*";
+      else if (ch === "_") out += ".";
+      else if (".^$*+?()[]{}|\\".indexOf(ch) !== -1) out += "\\\\" + ch;
+      else out += ch;
+    }
+    return field + ' matches "^' + out + '$"';
+  }
+
+  function toExpr(q) {
+    if (!q) return "true";
+    return q
+      .replace(/(\w+)\s*=~\s*"([^"]*)"/g, function(_, f, p) { return likeToRegex(f, p); })
+      .replace(/(\w+)\s*~=\s*"([^"]*)"/g, '$1 matches "$2"')
+      .replace(/tagged\s+"([^"]+)"/g, 'tagged("$1")')
+      .replace(/(^|[^=!<>~])=(?!=|~)/g, "$1==")
+      .replace(/\band\b/g, "&&")
+      .replace(/\bor\b/g, "||");
+  }
+
+
   // What server shall we connect to by default?
   var server;
 
@@ -81,14 +116,18 @@ var subs = (function() {
   };
 
   Subscription.prototype.url = function() {
-    var queryString = "query=" + encodeURIComponent(this.query);
     var loc = window.location;
 
     if (server_type === "sse") {
-      return loc.protocol + "//" + server + "/index?" + queryString;
+      // riemann-go: /subscribe?q=<expr>, and snapshot=true sends the current
+      // index on the same stream before live events. There is no second
+      // connection to make, and nothing can slip between the two.
+      return loc.protocol + "//" + server + "/subscribe?snapshot=true&q=" +
+        encodeURIComponent(toExpr(this.query));
     } else {
       var ws_uri = (loc.protocol === "https:") ? "wss://" : "ws://";
-      return ws_uri + server + "/index?subscribe=true&" + queryString;
+      return ws_uri + server + "/index?subscribe=true&query=" +
+        encodeURIComponent(this.query);
     }
   };
 
@@ -104,7 +143,12 @@ var subs = (function() {
     var t1 = Date.now();
     if (active) {
       var event = JSON.parse(e.data);
-      event.time = Date.parse(event.time);
+      // riemann-go sends `time` as float seconds since the epoch; riemann
+      // sent an ISO string. Date.parse on a number yields NaN, which poisons
+      // every expiry and every chart point downstream.
+      event.time = (typeof event.time === "number")
+        ? Math.round(event.time * 1000)
+        : Date.parse(event.time);
       clock.advance(event.time);
 
       // Update the local expiry index. Only live events carry a TTL.
@@ -127,6 +171,9 @@ var subs = (function() {
   // streaming socket surfaces connectivity errors, so failures here are
   // silent.
   Subscription.prototype.snapshot = function() {
+    // Websocket only. Under SSE the snapshot rides the subscription itself,
+    // taken inside the server's own loop, so opening a second connection
+    // would duplicate every entry.
     if (server_type !== "ws") {
       return;
     }
