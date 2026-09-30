@@ -14,7 +14,16 @@ go build
 
 Open http://localhost:4567 in a browser. The dashboard connects to
 `127.0.0.1:5556` by default and shows a small manual. Point the address
-field in the toolbar at your Riemann server's websocket port.
+field in the toolbar at your Riemann server, and pick the connection type.
+
+Two servers are supported, chosen by the toolbar's websockets/sse switch:
+
+- **Riemann** over websockets, on the query surface port (5556 by default).
+- **[riemann-go](https://github.com/tnn1t1s/riemann-go)** over SSE, which
+  serves `/subscribe` and folds the index snapshot into the same stream.
+  Saved workspaces keep their queries: Riemann's query grammar is translated
+  to riemann-go's expression syntax on the way out, so a config written years
+  ago still loads and still works.
 
 ## Configuring
 
