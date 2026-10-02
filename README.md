@@ -32,8 +32,8 @@ Two servers are supported, chosen by the toolbar's websockets/sse switch:
 -config string   path to the workspace config JSON file (default "config.json")
 ```
 
-The `RIEMANN_DASH_CONFIG` environment variable sets the default config path
-when `-config` is not given. Workspace configs written by riemann-dash load
+The `RIEMANN_SURFACE_CONFIG` environment variable sets the default config path
+when `-config` is not given. Workspace configs written by the Ruby original load
 unchanged.
 
 ## Views
