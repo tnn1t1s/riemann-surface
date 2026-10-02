@@ -4,7 +4,7 @@
       this.clickFocusable = true;
       this.el.classList.add("help");
       this.el.appendChild(util.html('<div class="box">' +
-        "<p>Welcome to Riemann-Dash.</p>" +
+        "<p>Welcome to riemann-surface.</p>" +
         "<p>Need a refresher on the query language? See the <a href=\"https://github.com/riemann/riemann/blob/master/test/riemann/query_test.clj\">query tests</a> for examples, or read the <a href=\"https://github.com/riemann/riemann/blob/master/resources/query.g4\">spec</a>.</p>" +
         "<p>Double-click a workspace to rename it.</p>" +
         "<p>Press <b>Control/Meta+click</b> to select a view (<b>Option+Command+click</b> on a Mac). Escape unfocuses. Use the arrow keys to move a view. Use Control+arrow to <i>split</i> a view in the given direction.</p>" +
