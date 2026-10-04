@@ -18,7 +18,7 @@ import (
 var webFS embed.FS
 
 func defaultConfigPath() string {
-	if p := os.Getenv("RIEMANN_DASH_CONFIG"); p != "" {
+	if p := os.Getenv("RIEMANN_SURFACE_CONFIG"); p != "" {
 		return p
 	}
 	return "config.json"
