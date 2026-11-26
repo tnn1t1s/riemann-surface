@@ -225,6 +225,15 @@ var subs = (function() {
       self.handleMessage(e);
     };
 
+    // riemann-go names every SSE frame ("event: event" for a live event,
+    // "event: snapshot" for index state sent with snapshot=true). An
+    // EventSource hands a named frame only to listeners registered for that
+    // name, never to onmessage.
+    if (server_type === "sse") {
+      ws.addEventListener("event", function(e) { self.handleMessage(e); });
+      ws.addEventListener("snapshot", function(e) { self.handleMessage(e); });
+    }
+
     return this;
   };
 
